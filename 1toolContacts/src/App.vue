@@ -1,47 +1,50 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref } from 'vue'
+import Contacts from './components/Contacts.vue'
+
+const token = ref('')
+const tenant = ref('')
+
+const email = ref('')
+const password = ref('')
+
+async function login() {
+  const authData = await fetch('https://my.1tool.com/suite/api/auth/user', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
+  })
+  const authDataJson = await authData.json()
+
+  token.value = authDataJson.api_token
+  tenant.value = authDataJson.tenant_identifier
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <Contacts v-if="token && tenant" :token="token" :tenant="tenant" />
+  <div class="login" v-else>
+    Email:
+    <input v-model="email" type="email" />
+    Password:
+    <input v-model="password" type="password" />
+    <button class="button" @click="login">Login</button>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+.login {
+  display: flex;
+  flex-direction: column;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.button {
+  margin-top: 0.5rem;
 }
 </style>
